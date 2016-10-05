@@ -1,0 +1,11 @@
+pitch-example
+
+This application uses make as its interface.
+
+You must have Docker and Docker Compose installed to run this application
+
+- To run the application do `make start`
+- To run all unit tests do `make unit_tests`
+- To tear down the application do `make clean`
+- To run the linter do `make lint`
+- To list the stock by volume of a running application `make list_stock`
