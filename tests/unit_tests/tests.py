@@ -40,6 +40,14 @@ class GraphTests(TestCase):
         self.graph.add_nodes()
         self.assertFalse(self.graph.nodes)
 
+    def test_get_node_from_name_gives_none_if_not_exist(self):
+        self.assertIsNone(self.graph.get_node_from_name('Nope'))
+
+    def test_get_node_from_name_gives_back_correct_node(self):
+        node = route.Node('1')
+        self.graph.add_nodes(node)
+        self.assertEquals(node, self.graph.get_node_from_name('1'))
+
     def _build_0123_graph(self):
         """Graph for this test is as follows.
                 0
@@ -118,10 +126,10 @@ class BDDTests(TestCase):
             self.planner.get_route, 'A', 'E', 'D'
         )
 
-    #def test_number_of_routes_starting_at_C_and_ending_at_C(self):
-    #    possible_routes = self.planner.get_routes_between(
-    #        start_town='C',
-    #        end_town='C',
-    #        max_stops=3
-    #    )
-    #    self.assertEquals(len(possible_routes), 2)
+    def test_number_of_routes_starting_at_C_and_ending_at_C(self):
+        possible_routes = self.planner.get_routes_between(
+            start_town_name='C',
+            end_town_name='C',
+            max_stops=3
+        )
+        self.assertEquals(len(possible_routes), 2)
