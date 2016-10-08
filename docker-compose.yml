@@ -1,11 +1,11 @@
 version: '2'
 
 services:
-    thoughtworks_example:
-        image: thoughtworks_example
-        command: /bin/bash -c "python /thoughtworks-example/bin/runner.py"
+    train_routes_example:
+        image: train_routes_example
+        command: /bin/bash -c "python /train-routes-example/bin/runner.py"
         build:
             context: .
             dockerfile: Dockerfile
         volumes:
-            - .:/thoughtworks-example
+            - .:/train-routes-example

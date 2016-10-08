@@ -16,10 +16,10 @@ build: clean
 	docker-compose build
 
 start: build
-	docker-compose up -d thoughtworks_example
+	docker-compose up -d train_routes_example
 
 unit_tests: build
-	docker-compose run thoughtworks_example bash -c "python -m pytest /thoughtworks-example/tests/unit_tests/test*.py"
+	docker-compose run train_routes_example bash -c "python -m pytest /train-routes-example/tests/test*.py"
 
 lint:
-	docker-compose run thoughtworks_example bash -c "flake8 /thoughtworks-example"
+	docker-compose run train_routes_example bash -c "flake8 /train-routes-example"
