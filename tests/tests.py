@@ -153,8 +153,7 @@ class BDDTests(TestCase):
             start_town_name='C',
             end_town_name='C',
             min_stops=0,
-            max_stops=3,
-            revisits=1
+            max_stops=3
         )
         self.assertEquals(len(routes), 2)
 
@@ -163,8 +162,7 @@ class BDDTests(TestCase):
             start_town_name='A',
             end_town_name='C',
             min_stops=4,
-            max_stops=4,
-            revisits=1
+            max_stops=4
         )
         self.assertEquals(len(routes), 3)
 
@@ -182,11 +180,20 @@ class BDDTests(TestCase):
         )
         self.assertEquals(route.distance, 9)
 
-    @skip('not working')
     def test_number_of_routes_from_C_to_C_with_distance_less_than_30(self):
         routes = self.planner.get_routes_between(
             start_town_name='C',
             end_town_name='C',
             max_distance=30
         )
+        self.assertEquals(7, len(routes))
+        pretty_routes = [r.pretty for r in routes]
+        self.assertIn(['C', 'D', 'C'], pretty_routes)
+        self.assertIn(['C', 'E', 'B', 'C'], pretty_routes)
+        self.assertIn(['C', 'E', 'B', 'C', 'D', 'C'], pretty_routes)
+        self.assertIn(['C', 'D', 'C', 'E', 'B', 'C'], pretty_routes)
+        self.assertIn(['C', 'D', 'E', 'B', 'C'], pretty_routes)
+        self.assertIn(['C', 'E', 'B', 'C', 'E', 'B', 'C'], pretty_routes)
+        self.assertIn(['C', 'E', 'B', 'C', 'E', 'B', 'C', 'E', 'B' ,'C'], pretty_routes)
+
 

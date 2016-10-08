@@ -9,8 +9,8 @@ class Node:
         return self.name
 
     @property
-    def pretty_links(self):
-        """Print the links in a pretty format
+    def pretty(self):
+        """Reeturn links in a readable format
 
         [{node1.name: distance}, {node2.name: distance}, etc.]
         """
@@ -30,12 +30,16 @@ class Graph:
         return [n for n in self.nodes if n.name == index][0]
 
     @property
-    def pretty_nodes(self):
-        """Print the nodes in a readable format.
+    def pretty(self):
+        """Return the nodes in a readable format.
 
         [node1.name, node2.name, etc.]
         """
         return [n.name for n in self.nodes]
+
+    @property
+    def total_graph_distance(self):
+        return sum([sum(n.links.values()) for n in self.nodes])
 
     def get(self, node_name, default=None):
         try:
@@ -82,20 +86,21 @@ class Graph:
         if len(path) > 4 and path[-4] == path[-2] and path[-3] == path[-1]:
             return True
 
-    def paths_between_nodes(self, start_node, end_node, revisits=0):
+    def paths_between_nodes(self, start_node, end_node):
+        revisits = 5
         neighbours = [(start_node, [start_node])]
-        all_paths = []
+        paths = []
         while neighbours:
             (this_node, path) = neighbours.pop(0)
             if self._stuck(path):
-                break
+                continue
             for next_node in this_node.links:
                 full_path = path + [next_node]
                 if next_node == end_node:
-                    all_paths.append(full_path)
+                    paths.append(full_path)
                 if full_path.count(end_node) < revisits + 1:
                     neighbours.append((next_node, full_path))
-        return all_paths
+        return paths
 
     def _path_from_node(self, node, max_depth=-1):
         yield node
@@ -130,42 +135,43 @@ class Planner:
         towns = [self.graph[t] for t in town_names]
         if not self.graph.is_valid_path(*towns):
             raise ValueError(self.ERR)
-        return Route(*towns)
+        return Journey(*towns)
 
-    def get_routes_between(self, start_town_name, end_town_name, min_stops=0,
-                           max_stops=10, revisits=0):
-        min_towns = min_stops + 1
-        max_towns = max_stops + 1
-        start_node = self.graph[start_town_name]
-        end_node = self.graph[end_town_name]
+    def get_routes_between(self, start_town_name, end_town_name,
+                           max_distance=None, min_stops=0, max_stops=10):
         paths = self.graph.paths_between_nodes(
-            start_node,
-            end_node,
-            revisits=revisits
+            start_node=self.graph[start_town_name],
+            end_node=self.graph[end_town_name]
         )
-        allowed_paths = [p for p in paths if min_towns <= len(p) <= max_towns]
-        routes = [Route(*path) for path in allowed_paths]
-        return routes
+        journeys = [Journey(*path) for path in paths]
+        # Filter using stop boundaries
+        journeys = [j for j in journeys if min_stops <= j.stops <= max_stops]
+        # Filter using max_distance boundary
+        max_distance = max_distance or self.graph.total_graph_distance
+        return [j for j in journeys if j.distance < max_distance]
 
     def get_shortest_route_between(self, start_town_name, end_town_name):
         all_routes = self.get_routes_between(
             start_town_name,
-            end_town_name,
-            revisits=1
+            end_town_name
         )
         if all_routes:
             return min(all_routes, key=lambda r: r.distance)
-        return Route()
+        return Journey()
 
 
-class Route:
+class Journey:
 
     def __init__(self, *towns):
-        """A Route ."""
+        """A Journey is a single path through a route Graph."""
         self.towns = towns
 
     @property
-    def pretty_towns(self):
+    def stops(self):
+        return len(self.towns) - 1
+
+    @property
+    def pretty(self):
         """Return towns in a readable format.
 
         [town1.name, town2.name, etc.]
