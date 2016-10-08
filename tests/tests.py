@@ -153,7 +153,8 @@ class BDDTests(TestCase):
             start_town_name='C',
             end_town_name='C',
             min_stops=0,
-            max_stops=3
+            max_stops=3,
+            revisits=1
         )
         self.assertEquals(len(routes), 2)
 
@@ -162,6 +163,30 @@ class BDDTests(TestCase):
             start_town_name='A',
             end_town_name='C',
             min_stops=4,
-            max_stops=4
+            max_stops=4,
+            revisits=1
         )
         self.assertEquals(len(routes), 3)
+
+    def test_shortest_route_starting_at_A_and_ending_at_C(self):
+        route = self.planner.get_shortest_route_between(
+            start_town_name='A',
+            end_town_name='C'
+        )
+        self.assertEquals(route.distance, 9)
+
+    def test_shortest_route_starting_at_B_and_ending_at_B(self):
+        route = self.planner.get_shortest_route_between(
+            start_town_name='B',
+            end_town_name='B'
+        )
+        self.assertEquals(route.distance, 9)
+
+    @skip('not working')
+    def test_number_of_routes_from_C_to_C_with_distance_less_than_30(self):
+        routes = self.planner.get_routes_between(
+            start_town_name='C',
+            end_town_name='C',
+            max_distance=30
+        )
+
