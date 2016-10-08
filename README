@@ -1,11 +1,13 @@
-pitch-example
+# train-routes-example
 
+# Requirements
+Docker and Docker Compose are required to run this application. Installation guides can be found here:
+* https://docs.docker.com/engine/installation/
+* https://docs.docker.com/compose/install/
+
+## Usage
 This application uses make as its interface.
-
-You must have Docker and Docker Compose installed to run this application
-
-- To run the application do `make start`
-- To run all unit tests do `make unit_tests`
-- To tear down the application do `make clean`
-- To run the linter do `make lint`
-- To list the stock by volume of a running application `make list_stock`
+* To run the application do `make start`
+* To run all unit tests do `make unit_tests`
+* To tear down the application do `make clean`
+* To run the linter do `make lint`
