@@ -26,11 +26,8 @@ class Graph:
     def __init__(self):
         self.nodes = []
 
-    def add_nodes(self, *nodes):
-        """Add a node to the graph."""
-        for node in nodes:
-            if node.name not in [n.name for n in self.nodes]:
-                self.nodes.append(node)
+    def __getitem__(self, index):
+        return [n for n in self.nodes if n.name == index][0]
 
     @property
     def pretty_nodes(self):
@@ -40,22 +37,22 @@ class Graph:
         """
         return [n.name for n in self.nodes]
 
-    def distance_from_node1_to_node2(self, node_from_name, node_to_name):
-        node_from = self.get_node_from_name(node_from_name)
-        node_to = self.get_node_from_name(node_to_name)
+    def get(self, node_name, default=None):
         try:
-            return node_from.links[node_to]
+            return self[node_name]
         except IndexError:
-            return
+            return default
 
-    def get_node_from_name(self, node_name):
-        try:
-            node = [n for n in self.nodes if n.name == node_name][0]
-        except IndexError:
-            node = None
-        return node
+    def add_nodes(self, *nodes):
+        """Add a node to the graph."""
+        for node in nodes:
+            if node.name not in [n.name for n in self.nodes]:
+                self.nodes.append(node)
 
-    def is_valid_path(self, *node_names):
+    def distance_from_node1_to_node2(self, from_node, to_node):
+        return from_node.links[to_node]
+
+    def is_valid_path(self, *nodes):
         """Assert that the supplied node names are linked in the graph. Order
         of node names provided dertermines the traverse path.
 
@@ -66,12 +63,31 @@ class Graph:
             True - The path provided exists in the graph
             False - The path provided does not exist in the graph
         """
-        for i, node_name in enumerate(node_names[:-1]):
-            this_node = self.get_node_from_name(node_name)
-            next_node = self.get_node_from_name(node_names[i+1])
-            if next_node not in this_node.links:
+        for i, node in enumerate(nodes[:-1]):
+            next_node = nodes[i+1]
+            if next_node not in node.links:
                 return False
         return True
+
+    def paths_between_nodes(self, start_node, end_node, revisits=0):
+        neighbours = [(start_node, [start_node])]
+        all_paths = []
+        while neighbours:
+            (this_node, path) = neighbours.pop(0)
+            for next_node in this_node.links:
+                _path = path + [next_node]
+                if next_node == end_node:
+                    all_paths.append(_path)
+                if _path.count(end_node) < revisits + 1:
+                    neighbours.append((next_node, _path))
+        return all_paths
+
+    def _path_from_node(self, node, max_depth=-1):
+        yield node
+        if node:
+            for link in node.links:
+                for n in self._path_from_node(link):
+                    yield n
 
 
 class Planner:
@@ -83,11 +99,11 @@ class Planner:
 
     def _build_graph_from_edges(self, *edges):
         for edge in edges:
-            node_from = self.graph.get_node_from_name(edge[0]) or Node(edge[0])
-            node_to = self.graph.get_node_from_name(edge[1]) or Node(edge[1])
+            from_node = self.graph.get(edge[0], Node(edge[0]))
+            to_node = self.graph.get(edge[1], Node(edge[1]))
             distance = int(edge[2])
-            self.graph.add_nodes(node_from, node_to)
-            node_from.add_link(node_to, distance)
+            self.graph.add_nodes(from_node, to_node)
+            from_node.add_link(to_node, distance)
 
     def get_route(self, *town_names):
         """Return a Route object for a supplied list of towns to visit. The
@@ -96,22 +112,30 @@ class Planner:
         Args:
             town_names - the list of town names in order of travel ordered
         """
-        if not self.graph.is_valid_path(*town_names):
+        towns = [self.graph[t] for t in town_names]
+        if not self.graph.is_valid_path(*towns):
             raise ValueError(self.ERR)
 
         # Build new graph of nodes and links applicable to this route only
         route = Route(start_town_name=town_names[0])
-        for town_name in town_names[1:]:
-            previous_town_name = town_names[town_names.index(town_name)-1]
+        for town in towns[1:]:
+            previous_town = towns[towns.index(town)-1]
             distance = self.graph.distance_from_node1_to_node2(
-                node_from_name=previous_town_name,
-                node_to_name=town_name
+                from_node=previous_town,
+                to_node=town
             )
-            route.add_destination(town_name, distance)
+            route.add_destination(town.name, distance)
         return route
 
-    def get_routes_between(self, start_town_name, end_town_name, max_stops):
-        return [1,2]
+    def get_routes_between(self, start_town_name, end_town_name, min_stops,
+                           max_stops):
+        min_towns = min_stops + 1
+        max_towns = max_stops + 1
+        start_node = self.graph[start_town_name]
+        end_node = self.graph[end_town_name]
+        paths = self.graph.paths_between_nodes(start_node, end_node, revisits=1)
+        accepted_paths = [p for p in paths if min_towns <= len(p) <= max_towns]
+        return [[t.name for t in p] for p in accepted_paths]
 
 
 class Route:
@@ -119,8 +143,20 @@ class Route:
     def __init__(self, start_town_name):
         """A Route requires a starting town in order to be a valid route."""
         self.graph = Graph()
-        start_town = Node(start_town_name)
-        self.graph.add_nodes(start_town)
+        self.start_town = Node(start_town_name)
+        self.graph.add_nodes(self.start_town)
+
+    @property
+    def distance(self):
+        """Total distance of this route."""
+        distance = 0
+        for node in self.graph.nodes:
+            distance += sum(node.links.values())
+        return distance
+
+    @property
+    def end_town(self):
+        return self.graph.nodes[-1]
 
     def add_destination(self, town_name, distance):
         """Add the next destination to the end of our route.
@@ -132,11 +168,3 @@ class Route:
         town = Node(town_name)
         self.graph.nodes[-1].add_link(town, distance)
         self.graph.add_nodes(town)
-
-    @property
-    def distance(self):
-        """Total distance of this route."""
-        distance = 0
-        for node in self.graph.nodes:
-            distance += sum(node.links.values())
-        return distance

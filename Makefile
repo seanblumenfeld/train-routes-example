@@ -21,5 +21,5 @@ start: build
 unit_tests: build
 	docker-compose run thoughtworks_example bash -c "python -m pytest /thoughtworks-example/tests/unit_tests/test*.py"
 
-lint: build
-	docker-compose run thoughtworks_example bash -c "flake8 /thoughtworks-example/"
+lint:
+	docker-compose run thoughtworks_example bash -c "flake8 /thoughtworks-example"
