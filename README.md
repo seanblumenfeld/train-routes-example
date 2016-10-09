@@ -8,7 +8,7 @@ Docker and Docker Compose are required to run this application. Installation gui
 ##Usage
 This application uses make as its interface.
 * To run the application do `make start`
-* To run all unit tests do `make unit_tests`
+* To run all tests do `make tests`
 * To tear down the application do `make clean`
 * To run the linter do `make lint`
 * To run build a graph from a file input do:

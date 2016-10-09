@@ -1,11 +1,11 @@
-.PHONY: usage clean build run unit_tests lint
+.PHONY: usage clean build run tests lint
 
 usage:
 	@echo "Available commands:"
 	@echo "\tclean - stop the running containers and remove the volumes and network"
 	@echo "\tbuild - build the docker image"
 	@echo "\trun - run program"
-	@echo "\tunit_tests - run unit tests"
+	@echo "\ttests - run tests"
 	@echo "\tlint - run flake8"
 
 clean:
@@ -16,7 +16,7 @@ clean:
 build: clean
 	docker-compose build
 
-unit_tests: build
+tests: build
 	docker-compose run train_routes_example bash -c "python -m pytest /train-routes-example/tests/test*.py"
 
 lint:
