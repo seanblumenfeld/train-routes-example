@@ -13,5 +13,5 @@ This application uses make as its interface.
 * To run the linter do `make lint`
 * To run build a graph from a file input do:
     * Move input file to data directory of the project `./data/{filename}`
-    ** Then do `make run file={filename}`
-    ** There is an example file in the repository which will work out of the box. To try it do `make run file=graph_file_input_example.txt`
+    * Then do `make run file={filename}`
+    * There is an example file in the repository which will work out of the box. To try it do `make run file=graph_file_input_example.txt`
