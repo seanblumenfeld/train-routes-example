@@ -130,13 +130,6 @@ class Graph:
                     neighbours.append((next_node, full_path))
         return paths
 
-    def _path_from_node(self, node, max_depth=-1):
-        yield node
-        if node:
-            for link in node.links:
-                for n in self._path_from_node(link):
-                    yield n
-
 
 class Planner:
     ERR = 'NO SUCH ROUTE'
@@ -292,6 +285,7 @@ if __name__ == '__main__':
         #   AB2
         #   BC3
         #   CA9
+        # This simply prints out that graph in a readable format.
         print('Graph File supplied: {}'.format(xargs.graph_file))
         with open(os.path.join(DATA_DIR, xargs.graph_file)) as f:
             edges = f.read().splitlines()

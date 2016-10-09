@@ -80,14 +80,6 @@ class GraphTests(TestCase):
         nodes = self._build_0123_graph()
         self.assertFalse(self.graph.is_valid_path(nodes[1], nodes[0]))
 
-    def test_traverse_from_single_node(self):
-        nodes = self._build_0123_graph()
-        path = self.graph._path_from_node(nodes[0])
-        self.assertListEqual(
-            sorted([n.name for n in path]),
-            ['0', '1', '2', '3']
-        )
-
     def test_paths_between_same_node_is_empty(self):
         nodes = self._build_0123_graph()
         paths = self.graph.paths_between_nodes(nodes[0], nodes[0])
