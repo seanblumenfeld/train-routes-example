@@ -1,6 +1,6 @@
 from bin import route
 
-from unittest import TestCase, skip
+from unittest import TestCase
 
 
 class NodeTests(TestCase):
@@ -99,7 +99,6 @@ class GraphTests(TestCase):
         expected = [[nodes[0], nodes[1], nodes[3]]]
         self.assertListEqual([p for p in paths], expected)
 
-
     def test_paths_between_3_and_2_is_empty(self):
         nodes = self._build_0123_graph()
         paths = self.graph.paths_between_nodes(nodes[3], nodes[2])
@@ -194,6 +193,7 @@ class BDDTests(TestCase):
         self.assertIn(['C', 'D', 'C', 'E', 'B', 'C'], pretty_routes)
         self.assertIn(['C', 'D', 'E', 'B', 'C'], pretty_routes)
         self.assertIn(['C', 'E', 'B', 'C', 'E', 'B', 'C'], pretty_routes)
-        self.assertIn(['C', 'E', 'B', 'C', 'E', 'B', 'C', 'E', 'B' ,'C'], pretty_routes)
-
-
+        self.assertIn(
+            ['C', 'E', 'B', 'C', 'E', 'B', 'C', 'E', 'B', 'C'],
+            pretty_routes
+        )
